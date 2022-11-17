@@ -17,6 +17,8 @@ model User {
 
   password Password?
   notes    Note[]
+  Record   Record[]
+  Tag      Tag[]
 }
 
 model Password {
@@ -39,20 +41,57 @@ model Note {
 }
 
 model Record {
-  id          String     @id @default(cuid())
+  id          String    @id @default(cuid())
   title       String
-  type        RecordType @default(HAPPENED)
-  start       DateTime? // @default(now())
-  end         DateTime? // @default(now())
+  type        String    @default("HAPPENED")
+  // type        RecordType @default(HAPPENED)
+  start       DateTime?
+  end         DateTime?
   description String?
-  tagIDs      String[]   @db.ObjectId // @db.Array(ObjectId)
-  tags        Tag[]      @relation(fields: [tagIDs], references: [id])
-  user        User       @relation(fields: [userId], references: [id])
-  userId      String     @db.ObjectId
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  day         Day?       @relation(name: "records", fields: [dayId], references: [id])
-  dayId       String?    @db.ObjectId
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  tags        Tag[]
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String
+  day         Day?      @relation(name: "records", fields: [dayId], references: [id])
+  dayId       String?
+  // tags        Tag[]      @relation(fields: [tagIDs], references: [id])
+  // tagIDs      String[]
 }
 
-// FIXME: adapt with sqlite
+model Tag {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  styles      String?
+  records     Record[]
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  // styles      Style?
+  // Record      Record?  @relation(fields: [recordId], references: [id])
+  // recordId    String?
+  // records     Record[] @relation(fields: [recordIDs], references: [id])
+  // recordIDs   String[]
+}
+
+// type Style {
+//   bg     String?
+//   color  String?
+//   border String?
+//   shadow String?
+// }
+
+model Day {
+  id      String   @id @default(cuid())
+  date    DateTime @default(now())
+  records Record[] @relation(name: "records") // happened & planned
+  note    String? // journey & journaling
+}
+
+//? Enums are not supported by sqlite 
+// enum RecordType {
+//   HAPPENED
+//   PLANNED
+// }
