@@ -19,7 +19,7 @@ export function getRecord({
 export function getRecordListItems({ userId }: { userId: User["id"] }) {
   return prisma.record.findMany({
     where: { userId },
-    select: { id: true, title: true },
+    // select: { id: true, title: true },
     orderBy: { updatedAt: "desc" },
   });
 }
