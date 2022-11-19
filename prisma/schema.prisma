@@ -1,5 +1,5 @@
 datasource db {
-  provider = "sqlite"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
@@ -8,89 +8,64 @@ generator client {
 }
 
 model User {
-  id    String  @id @default(cuid())
-  email String  @unique
-  name  String?
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  email    String  @unique
+  name     String?
+  password String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  password Password?
-  Record   Record[]
-  Tag      Tag[]
+  Record Record[]
+  Tag    Tag[]
 }
-
-model Password {
-  hash String
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  userId String @unique
-}
-
-// model Note {
-//   id    String @id @default(cuid())
-//   title String
-//   body  String
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-
-//   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   userId String
-// }
 
 model Record {
-  id          String    @id @default(cuid())
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
   title       String
-  type        String    @default("HAPPENED")
-  // type        RecordType @default(HAPPENED)
+  type        RecordType @default(HAPPENED)
   start       DateTime?
   end         DateTime?
   description String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  tags        Tag[]
-  user        User      @relation(fields: [userId], references: [id])
-  userId      String
-  day         Day?      @relation(name: "records", fields: [dayId], references: [id])
-  dayId       String?
-  // tags        Tag[]      @relation(fields: [tagIDs], references: [id])
-  // tagIDs      String[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  user        User       @relation(fields: [userId], references: [id])
+  userId      String     @db.ObjectId
+  day         Day?       @relation(name: "records", fields: [dayId], references: [id])
+  dayId       String?    @db.ObjectId
+  tags        Tag[]      @relation(fields: [tagIDs], references: [id])
+  tagIDs      String[]   @db.ObjectId
 }
 
 model Tag {
-  id          String   @id @default(cuid())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   title       String
   description String?
   styles      String?
-  records     Record[]
-  user        User?    @relation(fields: [userId], references: [id])
-  userId      String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   // styles      Style?
-  // Record      Record?  @relation(fields: [recordId], references: [id])
-  // recordId    String?
-  // records     Record[] @relation(fields: [recordIDs], references: [id])
-  // recordIDs   String[]
+  user        User?    @relation(fields: [userId], references: [id])
+  userId      String?  @db.ObjectId
+  records     Record[] @relation(fields: [recordIDs], references: [id])
+  recordIDs   String[] @db.ObjectId
 }
 
-// type Style {
-//   bg     String?
-//   color  String?
-//   border String?
-//   shadow String?
-// }
+type Style {
+  bg     String?
+  color  String?
+  border String?
+  shadow String?
+}
 
 model Day {
-  id      String   @id @default(cuid())
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
   date    DateTime @default(now())
   records Record[] @relation(name: "records") // happened & planned
   note    String? // journey & journaling
 }
 
-//? Enums are not supported by sqlite 
-// enum RecordType {
-//   HAPPENED
-//   PLANNED
-// }
+enum RecordType {
+  HAPPENED
+  PLANNED
+}
