@@ -1,2 +1,2 @@
-export const Sidebar = () => <div className="Sidebar">SIDEBAR</div>;
+export const Sidebar = () => <div className="Sidebar"></div>;
 export default Sidebar;

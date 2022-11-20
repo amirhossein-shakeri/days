@@ -1,5 +1,5 @@
 import type { User, Record } from "@prisma/client";
-import { Link, useLoaderData } from "@remix-run/react";
+import { Link, Outlet, useLoaderData } from "@remix-run/react";
 import { type LoaderFunction, redirect, json } from "@remix-run/server-runtime";
 import Nav from "~/components/Nav";
 import Sidebar from "~/components/Sidebar";
@@ -7,7 +7,7 @@ import { getRecordListItems } from "~/models/record.server";
 import { getUser } from "~/session.server";
 
 type LoaderData = {
-  user?: User;
+  user: User;
   records?: Record[];
 };
 
@@ -26,19 +26,11 @@ export default function Index() {
 
   // URL schema: /$layout[today,planning,week,month,year]/$from[timeInterval]/$to[timeInterval]
   return (
-    <div className="Home">
+    <div className="Home bg-indigo-50">
       <Nav />
       <Sidebar />
       <div className="layout">
-        <div className="default-layout">
-          No layout selected!
-          <Link to="/focused" prefetch="render">
-            Focused View
-          </Link>
-          <Link to="/week" prefetch="render">
-            Week View
-          </Link>
-        </div>
+        <Outlet />
       </div>
     </div>
   );

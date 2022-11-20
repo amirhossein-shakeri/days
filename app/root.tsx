@@ -1,9 +1,9 @@
-import {
-  json,
+import type {
   LinksFunction,
   LoaderFunction,
   MetaFunction,
 } from "@remix-run/node";
+import { json } from "@remix-run/node";
 import {
   Links,
   LiveReload,
@@ -17,7 +17,16 @@ import { getUser } from "./session.server";
 import tailwindStylesheetUrl from "./styles/tailwind.css";
 
 export const links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: tailwindStylesheetUrl }];
+  return [
+    {
+      rel: "stylesheet",
+      href: tailwindStylesheetUrl,
+    },
+    {
+      rel: "stylesheet",
+      href: "https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200",
+    },
+  ];
 };
 
 export const meta: MetaFunction = () => ({
