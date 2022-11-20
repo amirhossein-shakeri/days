@@ -1,9 +1,9 @@
-import type {
+import {
+  json,
   LinksFunction,
   LoaderFunction,
   MetaFunction,
 } from "@remix-run/node";
-import { json } from "@remix-run/node";
 import {
   Links,
   LiveReload,
@@ -11,16 +11,10 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLoaderData,
 } from "@remix-run/react";
+import { getUser } from "./session.server";
 
 import tailwindStylesheetUrl from "./styles/tailwind.css";
-import { getUser } from "./session.server";
-import type { User, Record } from "@prisma/client";
-import { GuestHero } from "./components/GuestHero";
-import Nav from "./components/Nav";
-import Sidebar from "./components/Sidebar";
-import { getRecordListItems } from "./models/record.server";
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: tailwindStylesheetUrl }];
@@ -33,32 +27,12 @@ export const meta: MetaFunction = () => ({
   "theme-color": "#6366f1",
 });
 
-type LoaderData = {
-  user?: User;
-  records?: Record[];
-  layout: string;
-};
-
-export const loader: LoaderFunction = async ({ request, params }) => {
-  const user = await getUser(request);
-  const layout = params.layout ?? "focus";
-  console.log("USER: ", user);
-  const records = !user ? [] : await getRecordListItems({ userId: user.id });
-  return json<LoaderData>({
-    user: user ?? undefined,
-    records,
-    layout,
+export const loader: LoaderFunction = async ({ request }) =>
+  json({
+    user: await getUser(request),
   });
-};
 
 export default function App() {
-  const { user, records, layout } = useLoaderData<LoaderData>();
-  console.log("RECORDS", records);
-
-  if (!user) return <GuestHero />;
-
-  // URL schema: /$layout[today,planning,week,month,year]/$from[timeInterval]/$to[timeInterval]
-
   return (
     <html lang="en" className="h-full">
       <head>
@@ -66,13 +40,7 @@ export default function App() {
         <Links />
       </head>
       <body className="h-full">
-        <div className="Home">
-          <Nav />
-          <Sidebar />
-          <div className="layout">
-            <Outlet />
-          </div>
-        </div>
+        <Outlet />
         <ScrollRestoration />
         <Scripts />
         <LiveReload />

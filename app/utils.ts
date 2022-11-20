@@ -66,6 +66,11 @@ export function useUser(): User {
   return maybeUser;
 }
 
+// export function useRecords() {
+//   const data = useMatchesData("root");
+//   if (!data ||)
+// }
+
 export function validateEmail(email: unknown): email is string {
   return typeof email === "string" && email.length > 3 && email.includes("@");
 }

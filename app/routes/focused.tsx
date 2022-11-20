@@ -1,5 +1,5 @@
 export const FocusedPage = () => {
-  return <div className="focused">FOCUSED LAYOUT</div>;
+  return <div className="focused text-red-500">FOCUSED LAYOUT</div>;
 };
 
 export default FocusedPage;
