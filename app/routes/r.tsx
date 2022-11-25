@@ -13,7 +13,7 @@ type LoaderData = {
 
 export const loader: LoaderFunction = async ({ request }) => {
   const user = await getUser(request);
-  if (!user) return redirect("/guest");
+  if (!user) return redirect("/");
   const records = !user ? [] : await getRecordListItems({ userId: user.id });
   return json<LoaderData>({
     user: user ?? undefined,
@@ -27,7 +27,7 @@ export default function Index() {
   // URL schema: /$layout[today,planning,week,month,year]/$from[timeInterval]/$to[timeInterval]
   return (
     <div className="Home bg-indigo-50">
-      <Nav />
+      <Nav active={layout} />
       <Sidebar />
       <div className="layout">
         <Outlet />
