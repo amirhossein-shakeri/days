@@ -1,5 +1,5 @@
 import { Tag, User } from "@prisma/client";
-import { Form, Link, useLoaderData } from "@remix-run/react";
+import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 import {
   ActionFunction,
   json,
@@ -7,6 +7,7 @@ import {
   redirect,
 } from "@remix-run/server-runtime";
 import { ChangeEvent, ReactNode, useEffect, useState } from "react";
+import invariant from "tiny-invariant";
 import { prisma } from "~/db.server";
 import { requireUser } from "~/session.server";
 import { _2digit } from "~/utils";
@@ -17,6 +18,19 @@ export const DEFAULT_STATUS = <span className="text-emerald-500">✔ Ready</span
 type LoaderData = {
   user: User;
   tags: Tag[];
+};
+
+type ActionData = {
+  values: {
+    title: string;
+    start: string;
+    end: string;
+  };
+  errors: {
+    title?: string | boolean;
+    start?: string | boolean;
+    end?: string | boolean;
+  };
 };
 
 type StateData = {
@@ -44,11 +58,26 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export const action: ActionFunction = async ({ request }) => {
+  const form = await request.formData();
+  const data = {
+    title: form.get("title"),
+    type: form.get("type"),
+    start: form.get("start"),
+    end: form.get("end"),
+    description: form.get("description"),
+    tags: form.get("tags"),
+  };
+  const errors: ActionData["errors"] = {
+    title: !data.title && "Title is required",
+    start: !data.start && "Start is invalid",
+    end: !data.end && "Invalid end",
+  };
   return redirect("/r");
 };
 
 export const NewRecordPage = () => {
   const { user } = useLoaderData<LoaderData>();
+  const actionData = useActionData<ActionData>();
 
   const lastDate =
     typeof window !== "undefined" && localStorage.getItem(LAST_DATE_KEY);
@@ -61,7 +90,7 @@ export const NewRecordPage = () => {
 
   const [availTags, setAvailTags] = useState([]);
   const [data, setData] = useState<StateData>({
-    title: "",
+    title: actionData?.values.title ?? "",
     startString: "",
     endString: "",
     type: "HAPPENED",
