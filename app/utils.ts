@@ -74,3 +74,29 @@ export function useUser(): User {
 export function validateEmail(email: unknown): email is string {
   return typeof email === "string" && email.length > 3 && email.includes("@");
 }
+
+//* =-=-=-=-=-=-=-=-=-=-=-=-=-=-= Time Utils =-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+export const _2digit = (num: number) =>
+  num.toLocaleString("en-US", {
+    minimumIntegerDigits: 2,
+    useGrouping: false,
+  });
+
+export const formatDateTime = (d: Date) => {
+  if (!d) return false;
+  return `[${_2digit(d.getHours())}:${_2digit(d.getMinutes())}]`;
+};
+
+export const calcDuration = (t: number) => {
+  const seconds = t > 0 ? t / 1000 : -t / 1000;
+  const hours = Math.floor(seconds / 3600);
+  const remainingSeconds = seconds % 3600;
+  const minutes = Math.floor(remainingSeconds / 60);
+  let str = "";
+  if (hours) str += hours + "h";
+  if (minutes) str += minutes + "m";
+  return str;
+};
+
+export const formatDate = (d: Date) =>
+  `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;

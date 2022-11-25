@@ -1,8 +1,9 @@
 import { Link } from "@remix-run/react";
+import { Layout } from "~/components/$layout";
 import { MIcon } from "./MIcon";
 
 type Props = {
-  active: "focused" | "week" | "month";
+  active?: Layout;
 };
 
 const navLinks = [

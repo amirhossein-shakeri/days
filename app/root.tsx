@@ -15,12 +15,17 @@ import {
 import { getUser } from "./session.server";
 
 import tailwindStylesheetUrl from "./styles/tailwind.css";
+import appStylesUrl from "./styles/app.css";
 
 export const links: LinksFunction = () => {
   return [
     {
       rel: "stylesheet",
       href: tailwindStylesheetUrl,
+    },
+    {
+      rel: "stylesheet",
+      href: appStylesUrl,
     },
     {
       rel: "stylesheet",
