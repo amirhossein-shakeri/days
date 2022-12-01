@@ -1,9 +1,17 @@
-import type { ReactNode } from "react";
+import type { ButtonHTMLAttributes, DetailedHTMLProps, ReactNode } from "react";
 
-type Props = {
-  className?: string;
-  children: ReactNode;
-};
+export interface Props
+  extends DetailedHTMLProps<
+    ButtonHTMLAttributes<HTMLButtonElement>,
+    HTMLButtonElement
+  > {
+  size?: "sm" | "md" | "lg";
+}
+
+// type Props = {
+//   className?: string;
+//   children: ReactNode;
+// };
 
 export const Button = ({ className, children, ...props }: Props) => (
   <button
