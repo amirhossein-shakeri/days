@@ -1,5 +1,11 @@
 import type { Tag, User } from "@prisma/client";
-import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
+import {
+  Form,
+  Link,
+  useActionData,
+  useLoaderData,
+  useTransition,
+} from "@remix-run/react";
 import {
   type ActionFunction,
   json,
@@ -21,11 +27,6 @@ type LoaderData = {
 };
 
 type ActionData = {
-  values: {
-    title: string;
-    start: string;
-    end: string;
-  };
   errors: {
     title?: string | boolean;
     start?: string | boolean;
@@ -72,12 +73,14 @@ export const action: ActionFunction = async ({ request }) => {
     start: !data.start && "Start is invalid",
     end: !data.end && "Invalid end",
   };
+  if (Object.values(errors).some(Boolean)) return json({ errors }, 400); // , values: Object.fromEntries(form)
   return redirect("/r");
 };
 
 export const NewRecordPage = () => {
   const { user } = useLoaderData<LoaderData>();
   const actionData = useActionData<ActionData>();
+  const transition = useTransition();
 
   const lastDate =
     typeof window !== "undefined" && localStorage.getItem(LAST_DATE_KEY);
@@ -88,9 +91,8 @@ export const NewRecordPage = () => {
     setInterval(() => setTime(new Date()), 1000);
   }, []);
 
-  const [availTags, setAvailTags] = useState([]);
   const [data, setData] = useState<StateData>({
-    title: actionData?.values.title ?? "",
+    title: "", //actionData?.values.title ??
     startString: "",
     endString: "",
     type: "HAPPENED",
@@ -199,6 +201,7 @@ export const NewRecordPage = () => {
               className={`${inputClassNames}`}
               placeholder="Title"
               value={data.title}
+              // defaultValue={actionData?.values.title}
               onChange={(e) =>
                 setData((p) => ({ ...p, title: e.target.value }))
               }
@@ -222,7 +225,11 @@ export const NewRecordPage = () => {
               onChange={updateEnd}
             />
           </div>
-          <Button className="">Create {planning && " Planned "} Record</Button>
+          <Button className="" disabled={transition.state === "submitting"}>
+            {transition.state === "submitting" ? "Creating " : "Create "}
+            {planning && " Planned "} Record{" "}
+            {transition.state === "submitting" ? "..." : ""}
+          </Button>
           <span className="status text-center">{data.status}</span>
           <div className="inputs mb-4 flex flex-col gap-2">
             <input
