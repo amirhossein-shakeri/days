@@ -1,16 +1,16 @@
-import { Tag, User } from "@prisma/client";
+import type { Tag, User } from "@prisma/client";
 import { Form, Link, useActionData, useLoaderData } from "@remix-run/react";
 import {
-  ActionFunction,
+  type ActionFunction,
   json,
-  LoaderFunction,
+  type LoaderFunction,
   redirect,
 } from "@remix-run/server-runtime";
-import { ChangeEvent, ReactNode, useEffect, useState } from "react";
-import invariant from "tiny-invariant";
+import { type ChangeEvent, type ReactNode, useEffect, useState } from "react";
 import { prisma } from "~/db.server";
 import { requireUser } from "~/session.server";
 import { _2digit } from "~/utils";
+import { Button } from "~/components/Button";
 
 export const LAST_DATE_KEY = "create-record-date";
 export const DEFAULT_STATUS = <span className="text-emerald-500">✔ Ready</span>;
@@ -180,20 +180,23 @@ export const NewRecordPage = () => {
 
   return (
     <div>
-      <div className="create-record">
-        <Form method="post" className="create-record-form">
-          <h1 className="title">
+      <div className="create-record flex h-screen w-full flex-col items-center justify-center border sm:p-2">
+        <Form
+          method="post"
+          className="flex w-full flex-col gap-2 rounded-lg border-slate-200 bg-white px-3 py-2 shadow-lg sm:h-auto sm:w-auto sm:rounded-xl sm:border sm:p-4"
+        >
+          <h1 className="title text-center text-lg font-semibold">
             {planning ? "Plan " : "Create "}
             New Record
           </h1>
-          <div className="inputs">
+          <div className="inputs my-4 flex flex-col gap-2">
             <input
               type="text"
               name="title"
               id="inputTitle"
               autoFocus
               autoComplete="on"
-              className="dark-input"
+              className={`${inputClassNames}`}
               placeholder="Title"
               value={data.title}
               onChange={(e) =>
@@ -204,7 +207,7 @@ export const NewRecordPage = () => {
               type="text"
               name="start"
               id="inputStart"
-              className="dark-input font-mono"
+              className={`${inputClassNames} font-mono`}
               value={data.startString}
               placeholder="04:03 start"
               onChange={updateStart}
@@ -213,24 +216,20 @@ export const NewRecordPage = () => {
               type="text"
               name="end"
               id="inputEnd"
-              className="dark-input font-mono"
+              className={`${inputClassNames} font-mono`}
               value={data.endString}
               placeholder="04:24 end"
               onChange={updateEnd}
             />
           </div>
-          <button className="btn BtnCreate">
-            Create
-            {planning && " Planned "}
-            Record
-          </button>
-          <span className="status">{data.status}</span>
-          <div className="inputs">
+          <Button className="">Create {planning && " Planned "} Record</Button>
+          <span className="status text-center">{data.status}</span>
+          <div className="inputs mb-4 flex flex-col gap-2">
             <input
               type="date"
               name="date"
               id="inputDate"
-              className="dark-input font-mono"
+              className={`${inputClassNames} font-mono`}
               placeholder="date"
               value={dateAsString}
               onChange={updateDate}
@@ -239,7 +238,7 @@ export const NewRecordPage = () => {
               name="description"
               id="inputDescription"
               rows={3}
-              className="dark-input"
+              className={`${inputClassNames}`}
               placeholder="Description ..."
               onChange={(e) =>
                 setData((p) => ({ ...p, description: e.target.value }))
@@ -247,12 +246,12 @@ export const NewRecordPage = () => {
               value={data.description}
             ></textarea>
 
-            <div className="tags">
+            <div className="tags flex flex-row flex-wrap gap-1">
               {data.tags?.map(
                 (t) =>
                   // <Tag key={t.id} {...t} />
                   "TAG"
-                // <span className="tag"
+                // <span className="tag bg-slate-300 dark:bg-slate-600 shadow-md rounded px-1 text-xs"
                 //   onClick={() => { removeTag(t); syncTagsString() }}>
                 //   {t.title}
                 // </span>
@@ -263,7 +262,7 @@ export const NewRecordPage = () => {
               type="text"
               name="tag"
               id="inputTag"
-              className="dark-input font-mono"
+              className={`${inputClassNames} font-mono`}
               value={data.tagsString}
               placeholder="a, grow, ..."
               onChange={updateTags}
@@ -274,8 +273,8 @@ export const NewRecordPage = () => {
           <span className="time text-center font-mono text-green-500">
             {`${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}`}
           </span>
-          <Link to="/r">
-            <a className="text-center text-blue-400">HOME</a>
+          <Link to="/r" className="text-center text-blue-400">
+            HOME
           </Link>
         </Form>
       </div>
@@ -296,5 +295,7 @@ export const refineTags = (rawTags: string) => {
   if (!tags[tags.length - 1].title) tags.pop();
   return tags;
 };
+
+export const inputClassNames = `border border-slate-300 shadow-inner w-full rounded-md py-0.5 px-1 bg-slate-100 font-medium`;
 
 export default NewRecordPage;
