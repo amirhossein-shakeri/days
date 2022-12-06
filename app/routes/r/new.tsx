@@ -1,4 +1,4 @@
-import type { Tag, User } from "@prisma/client";
+import type { RecordType, Tag, User } from "@prisma/client";
 import {
   Form,
   Link,
@@ -17,6 +17,7 @@ import { prisma } from "~/db.server";
 import { requireUser } from "~/session.server";
 import { _2digit } from "~/utils";
 import { Button } from "~/components/Button";
+import invariant from "tiny-invariant";
 
 export const LAST_DATE_KEY = "create-record-date";
 export const DEFAULT_STATUS = <span className="text-emerald-500">✔ Ready</span>;
@@ -59,6 +60,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export const action: ActionFunction = async ({ request }) => {
+  const user = await requireUser(request);
   const form = await request.formData();
   const data = {
     title: form.get("title"),
@@ -68,13 +70,41 @@ export const action: ActionFunction = async ({ request }) => {
     description: form.get("description"),
     tags: form.get("tags"),
   };
+  /* VALIDATION */
   const errors: ActionData["errors"] = {
     title: !data.title && "Title is required",
-    start: !data.start && "Start is invalid",
-    end: !data.end && "Invalid end",
+    start: !data.start && "Start is required",
+    end: !data.end && "End is required",
   };
   if (Object.values(errors).some(Boolean)) return json({ errors }, 400); // , values: Object.fromEntries(form)
-  return redirect("/r");
+  invariant(typeof data.start === "string", "Invalid Start");
+  invariant(typeof data.end === "string", "Invalid End");
+
+  console.log("DATA: ", data, form.entries());
+
+  // parse start & end
+  const startAsNumber = parseInt(data.start);
+  const endAsNumber = parseInt(data.end);
+  const start = new Date(startAsNumber);
+  const end = new Date(endAsNumber);
+
+  // parse tags
+
+  // create record
+  const record = await prisma.record.create({
+    data: {
+      userId: user.id,
+      title: data.title as string, // FIXME: validate?
+      type: data.type as RecordType, // FIXME: validate this shit
+      start,
+      end,
+      description: data.description as string, // FIXME: validate?
+    },
+  });
+
+  console.log("Created new record: ", record);
+
+  return redirect("/r/focused");
 };
 
 export const NewRecordPage = () => {
@@ -84,6 +114,7 @@ export const NewRecordPage = () => {
 
   const lastDate =
     typeof window !== "undefined" && localStorage.getItem(LAST_DATE_KEY);
+  if (lastDate === "NaN") localStorage.removeItem(LAST_DATE_KEY);
   const targetDate = lastDate ? new Date(lastDate) : new Date();
 
   const [time, setTime] = useState(new Date());
@@ -94,6 +125,8 @@ export const NewRecordPage = () => {
   const [data, setData] = useState<StateData>({
     title: "", //actionData?.values.title ??
     startString: "",
+    // start: NaN,
+    // end: NaN,
     endString: "",
     type: "HAPPENED",
     description: "",
@@ -101,14 +134,23 @@ export const NewRecordPage = () => {
     date: targetDate.getTime(),
     status: DEFAULT_STATUS,
   });
+  // console.log("DATA: ", data.start, data.end, data.date, targetDate);
 
   const updateDate = (e: ChangeEvent<HTMLInputElement>) => {
+    const input = e.currentTarget;
     // also update start & end
+    console.log(
+      "changed: ",
+      input.value,
+      input.valueAsNumber,
+      input.valueAsDate
+    );
+    if (!input.valueAsDate) return;
     setData((p) => {
       const oldStart = new Date(p.start ?? p.date); //? Always have value?
       const oldEnd = new Date(p.end ?? p.date); //? Always have value?
-      const start = new Date(e.target.valueAsNumber);
-      const end = new Date(e.target.valueAsNumber);
+      const start = new Date(input.valueAsNumber); // input.valueAsDate
+      const end = new Date(input.valueAsNumber); // input.valueAsDate
       start.setHours(
         oldStart.getHours(),
         oldStart.getMinutes(),
@@ -119,13 +161,13 @@ export const NewRecordPage = () => {
         ...p,
         start: start.getTime(),
         end: end.getTime(),
-        date: e.target.valueAsNumber,
-        // dateAsString: e.target.value, //? Remove?
+        date: input.valueAsNumber,
+        // dateAsString: input.value, //? Remove?
       };
     });
 
     if (typeof window !== "undefined")
-      localStorage.setItem(LAST_DATE_KEY, e.target.valueAsNumber.toString());
+      localStorage.setItem(LAST_DATE_KEY, input.value);
   };
 
   const updateStart = (e: ChangeEvent<HTMLInputElement>) => {
@@ -198,7 +240,9 @@ export const NewRecordPage = () => {
               id="inputTitle"
               autoFocus
               autoComplete="on"
-              className={`${inputClassNames}`}
+              className={`${inputClassNames} ${
+                actionData?.errors.title ? "border-red-600" : ""
+              }`}
               placeholder="Title"
               value={data.title}
               // defaultValue={actionData?.values.title}
@@ -206,24 +250,43 @@ export const NewRecordPage = () => {
                 setData((p) => ({ ...p, title: e.target.value }))
               }
             />
+            {actionData?.errors.title && (
+              <div className="error mb-3 rounded-md border border-red-600 bg-red-100 px-1 py-0.5 text-red-600 shadow-md shadow-red-100">
+                {actionData.errors.title}
+              </div>
+            )}
             <input
               type="text"
-              name="start"
+              // name="start"
               id="inputStart"
-              className={`${inputClassNames} font-mono`}
-              value={data.startString}
+              className={`${inputClassNames} font-mono ${
+                actionData?.errors.start ? "border-red-600" : ""
+              }`}
+              value={data.start ? data.startString : ""}
               placeholder="04:03 start"
               onChange={updateStart}
             />
+            {actionData?.errors.start && (
+              <div className="error mb-3 rounded-md border border-red-600 bg-red-100 px-1 py-0.5 text-red-600 shadow-md shadow-red-100">
+                {actionData.errors.start}
+              </div>
+            )}
             <input
               type="text"
-              name="end"
+              // name="end"
               id="inputEnd"
-              className={`${inputClassNames} font-mono`}
-              value={data.endString}
+              className={`${inputClassNames} font-mono ${
+                actionData?.errors.end ? "border-red-600" : ""
+              }`}
+              value={data.end ? data.endString : ""}
               placeholder="04:24 end"
               onChange={updateEnd}
             />
+            {actionData?.errors.end && (
+              <div className="error mb-3 rounded-md border border-red-600 bg-red-100 px-1 py-0.5 text-red-600 shadow-md shadow-red-100">
+                {actionData.errors.end}
+              </div>
+            )}
           </div>
           <Button className="" disabled={transition.state === "submitting"}>
             {transition.state === "submitting" ? "Creating " : "Create "}
@@ -267,7 +330,7 @@ export const NewRecordPage = () => {
 
             <input
               type="text"
-              name="tag"
+              name="tags"
               id="inputTag"
               className={`${inputClassNames} font-mono`}
               value={data.tagsString}
@@ -275,6 +338,9 @@ export const NewRecordPage = () => {
               onChange={updateTags}
               // onKeyUp={updateTags}
             />
+            <input type="hidden" name="type" value={data.type} />
+            <input type="hidden" name="start" value={data.start} />
+            <input type="hidden" name="end" value={data.end} />
             {/* <ReactTags /> */}
           </div>
           <span className="time text-center font-mono text-green-500">
