@@ -115,7 +115,12 @@ export const NewRecordPage = () => {
   const lastDate =
     typeof window !== "undefined" && localStorage.getItem(LAST_DATE_KEY);
   if (lastDate === "NaN") localStorage.removeItem(LAST_DATE_KEY);
-  const targetDate = lastDate ? new Date(lastDate) : new Date();
+  const targetDate = lastDate
+    ? new Date(lastDate) > new Date()
+      ? new Date(lastDate)
+      : new Date()
+    : new Date();
+  console.log("DATES: ", lastDate, targetDate);
 
   const [time, setTime] = useState(new Date());
   useEffect(() => {
@@ -134,17 +139,11 @@ export const NewRecordPage = () => {
     date: targetDate.getTime(),
     status: DEFAULT_STATUS,
   });
-  // console.log("DATA: ", data.start, data.end, data.date, targetDate);
+  // console.log("DATA: ", data.start, data.end, data.date);
 
   const updateDate = (e: ChangeEvent<HTMLInputElement>) => {
     const input = e.currentTarget;
     // also update start & end
-    console.log(
-      "changed: ",
-      input.value,
-      input.valueAsNumber,
-      input.valueAsDate
-    );
     if (!input.valueAsDate) return;
     setData((p) => {
       const oldStart = new Date(p.start ?? p.date); //? Always have value?
