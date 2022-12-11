@@ -1,7 +1,9 @@
 import type { Record, User } from "@prisma/client";
 import { Link, useLoaderData } from "@remix-run/react";
-import { json, LoaderFunction, redirect } from "@remix-run/server-runtime";
+import type { LoaderFunction } from "@remix-run/server-runtime";
+import { json, redirect } from "@remix-run/server-runtime";
 import { Button } from "~/components/Button";
+import RecordCard from "~/components/Record";
 import { getRecordListItems } from "~/models/record.server";
 import { getUser } from "~/session.server";
 
@@ -24,7 +26,11 @@ export const FocusedPage = () => {
   return (
     <div className="focused">
       {records.length > 0 ? (
-        <>THERE ARE SOME RECORDS</>
+        <>
+          {records.map((r) => (
+            <RecordCard key={r.id} data={r} />
+          ))}
+        </>
       ) : (
         <div className="no-records">
           No records yet.{" "}

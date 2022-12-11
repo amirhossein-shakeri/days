@@ -84,6 +84,7 @@ export const _2digit = (num: number) =>
 
 export const formatDateTime = (d: Date) => {
   if (!d) return false;
+  // return "fff";
   return `[${_2digit(d.getHours())}:${_2digit(d.getMinutes())}]`;
 };
 
