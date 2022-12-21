@@ -29,25 +29,48 @@ export const RecordCard = ({ data: r, className, ...props }: Props) => {
 
   return (
     <div
-      className={`/dark:bg-slate-800 /dark:hover:bg-neutral-800 rounded-md bg-slate-100 shadow-md hover:bg-neutral-200 ${className}`}
+      className={`/dark:bg-slate-800 /dark:hover:bg-neutral-800 
+        h-8 min-w-[250px] overflow-hidden rounded-md bg-slate-100
+        shadow-md transition-all hover:h-32
+         hover:bg-neutral-200
+        ${className}`}
+      // style={{ transition: "" }}
       {...props}
     >
-      <div className="head">
-        <span className="time">
+      <div
+        className="head /dark:text-slate-400 /dark:hover:text-slate-300  flex 
+          cursor-default items-center gap-1 py-1 px-2 
+          text-slate-700 transition-all hover:text-slate-800"
+      >
+        <span className="time flex gap-1 font-mono text-xs text-stone-500">
           <span className="start" title={`Until ${fEnd}`}>
             {fStart}
           </span>
           {fEnd && <span className={styles.end}>{fEnd}</span>}
-          {duration && <span className={`duration ${r.type}`}>{duration}</span>}
+          {duration && (
+            <span
+              className={`duration text-center text-sm font-bold ${r.type} ${
+                r.type === "PLANNED" ? "text-blue-500" : "text-emerald-500"
+              }`}
+            >
+              {duration}
+            </span>
+          )}
           {/* if ended, show the duration or idk always show duration but in
         another color */}
         </span>
-        <h4 className="title" title={r.title}>
+        <h4
+          className="title overflow-hidden text-ellipsis whitespace-nowrap font-semibold"
+          title={r.title}
+        >
           {r.title}
         </h4>
-        <div className="options">
+        <div className="options /dark:text-slate-700 ml-auto flex flex-shrink items-center justify-center text-slate-500">
           {r.description && (
-            <span className="option" title={r.description}>
+            <span
+              className="option rounded-md p-[2px] transition"
+              title={r.description}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
@@ -67,7 +90,9 @@ export const RecordCard = ({ data: r, className, ...props }: Props) => {
           {/* If a planned record with the same title, show a time/clock icon with color if that is done */}
           {hasSimilar && (
             <span
-              className={`option clock ${r.type}`}
+              className={`option clock ${
+                r.type === "PLANNED" ? "text-blue-500" : "text-emerald-500"
+              }`}
               title={
                 planned
                   ? "This plan is done! 🎉"
@@ -112,11 +137,12 @@ export const RecordCard = ({ data: r, className, ...props }: Props) => {
         </div>
       </div>
 
-      <div className="details">
+      <div className="details h-24 bg-slate-300 py-1 px-2 text-xs shadow-inner dark:bg-slate-700">
         <div className="description">{r.description}</div>
         {/* A check box to make it like a task which if checked, a new record will be created. */}
         <div className="times">
           Created At: {r.createdAt.toLocaleString()}
+          <br />
           Updated At: {r.updatedAt.toLocaleString()}
         </div>
       </div>

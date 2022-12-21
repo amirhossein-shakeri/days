@@ -31,10 +31,10 @@ export default function Index() {
 
   // URL schema: /$layout[today,planning,week,month,year]/$from[timeInterval]/$to[timeInterval]
   return (
-    <div className="Home bg-indigo-50">
+    <div className="Home h-full bg-indigo-50">
       <Nav active={layout} />
       <Sidebar />
-      <div className="layout">
+      <div className="layout h-full">
         <Outlet />
       </div>
     </div>

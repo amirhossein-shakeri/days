@@ -24,7 +24,7 @@ export const FocusedPage = () => {
   console.log("RECORDS: ", records);
 
   return (
-    <div className="focused">
+    <div className="focused flex h-full flex-col items-stretch gap-2 px-1 py-4">
       {records.length > 0 ? (
         <>
           {records.map((r) => (
