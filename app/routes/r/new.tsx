@@ -120,12 +120,11 @@ export const NewRecordPage = () => {
       ? new Date(lastDate)
       : new Date()
     : new Date();
-  console.log("DATES: ", lastDate, targetDate);
 
   const [time, setTime] = useState(new Date());
-  useEffect(() => {
-    setInterval(() => setTime(new Date()), 1000);
-  }, []);
+  // useEffect(() => {
+  //   setInterval(() => setTime(new Date()), 1000);
+  // }, []);
 
   const [data, setData] = useState<StateData>({
     title: "", //actionData?.values.title ??
@@ -139,12 +138,26 @@ export const NewRecordPage = () => {
     date: targetDate.getTime(),
     status: DEFAULT_STATUS,
   });
-  // console.log("DATA: ", data.start, data.end, data.date);
+  console.log("DATES:", data.date, "|", lastDate, "|", targetDate);
+  console.log("DATA: ", data.start, data.end, data.date);
 
   const updateDate = (e: ChangeEvent<HTMLInputElement>) => {
     const input = e.currentTarget;
     // also update start & end
     if (!input.valueAsDate) return;
+    console.log(
+      "Date is updated",
+      input.value,
+      input.valueAsDate,
+      new Date(data.date)
+    );
+    console.log("VALUE:", input.value, new Date(input.value));
+    console.log(
+      "VALUE_AS_NUMBER",
+      input.valueAsNumber,
+      new Date(input.valueAsNumber)
+    );
+    console.log("VALUE_AS_DATE", input.valueAsDate);
     setData((p) => {
       const oldStart = new Date(p.start ?? p.date); //? Always have value?
       const oldEnd = new Date(p.end ?? p.date); //? Always have value?
@@ -153,15 +166,20 @@ export const NewRecordPage = () => {
       start.setHours(
         oldStart.getHours(),
         oldStart.getMinutes(),
-        oldStart.getSeconds()
+        oldStart.getSeconds(),
+        oldStart.getMilliseconds()
       );
-      end.setHours(oldEnd.getHours(), oldEnd.getMinutes(), oldEnd.getSeconds());
+      end.setHours(
+        oldEnd.getHours(),
+        oldEnd.getMinutes(),
+        oldEnd.getSeconds(),
+        oldEnd.getMilliseconds()
+      );
       return {
         ...p,
         start: start.getTime(),
         end: end.getTime(),
         date: input.valueAsNumber,
-        // dateAsString: input.value, //? Remove?
       };
     });
 
@@ -177,7 +195,7 @@ export const NewRecordPage = () => {
     const start = new Date(data.date);
     const parsed = startValue.split(":");
     if (parsed.length < 1) return console.log("start not ok");
-    start.setHours(parseInt(parsed[0]), parseInt(parsed[1]) || 0, 0);
+    start.setHours(parseInt(parsed[0]), parseInt(parsed[1]) || 0, 0, 0);
     setData((p) => ({ ...p, start: start.getTime() }));
   };
 
@@ -189,7 +207,7 @@ export const NewRecordPage = () => {
     const end = new Date(data.date);
     const parsed = endValue.split(":");
     if (parsed.length < 1) return console.log("end not ok");
-    end.setHours(parseInt(parsed[0]), parseInt(parsed[1]) || 0, 0);
+    end.setHours(parseInt(parsed[0]), parseInt(parsed[1]) || 0, 0, 0);
     setData((p) => ({ ...p, end: end.getTime() }));
   };
 
@@ -215,11 +233,14 @@ export const NewRecordPage = () => {
   }, [data.end, data.start]);
 
   const planning = data.type === "PLANNED";
+  const d = new Date(data.date);
   const dateAsString = [
-    targetDate.getFullYear(),
-    _2digit(targetDate.getMonth() + 1), // getMonth starts from 0
-    _2digit(targetDate.getDate()), // getDay is the day of the week
+    d.getFullYear(),
+    _2digit(d.getMonth() + 1), // getMonth starts from 0
+    _2digit(d.getDate()), // getDay is the day of the week
   ].join("-");
+
+  console.log("LISTEN:", dateAsString, d, d.getDate());
 
   return (
     <div>

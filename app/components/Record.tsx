@@ -15,7 +15,7 @@ export const RecordCard = ({ data: r, className, ...props }: Props) => {
   r.createdAt = new Date(r.createdAt ?? Date.now());
   r.updatedAt = new Date(r.updatedAt ?? Date.now());
 
-  console.log("RECORD: ", r);
+  // console.log("RECORD: ", r);
   const fStart = formatDateTime(r.start ?? new Date()); // formatted start
   const fEnd = formatDateTime(r.end ?? new Date());
   const duration = calcDuration(
@@ -29,11 +29,9 @@ export const RecordCard = ({ data: r, className, ...props }: Props) => {
 
   return (
     <div
-      className={`/dark:bg-slate-800 /dark:hover:bg-neutral-800 
-        h-8 min-w-[250px] overflow-hidden rounded-md bg-slate-100
-        shadow-md transition-all hover:h-32
-         hover:bg-neutral-200
-        ${className}`}
+      className={`Record /dark:bg-slate-800 /dark:hover:bg-neutral-800 
+        h-8 min-w-[250px] overflow-hidden rounded-md bg-white shadow-md
+        hover:h-32 hover:bg-indigo-200 sm:max-w-[320px] ${className}`}
       // style={{ transition: "" }}
       {...props}
     >
@@ -42,15 +40,19 @@ export const RecordCard = ({ data: r, className, ...props }: Props) => {
           cursor-default items-center gap-1 py-1 px-2 
           text-slate-700 transition-all hover:text-slate-800"
       >
-        <span className="time flex gap-1 font-mono text-xs text-stone-500">
+        <span className="time flex items-center gap-1 font-mono text-xs text-stone-500">
           <span className="start" title={`Until ${fEnd}`}>
             {fStart}
           </span>
-          {fEnd && <span className={styles.end}>{fEnd}</span>}
+          {/* {fEnd && <span className={styles.end}>{fEnd}</span>} */}
           {duration && (
             <span
-              className={`duration text-center text-sm font-bold ${r.type} ${
-                r.type === "PLANNED" ? "text-blue-500" : "text-emerald-500"
+              className={`duration /dark:p-0 rounded px-1 text-center text-sm font-bold ${
+                r.type
+              } ${
+                r.type === "PLANNED"
+                  ? "bg-blue-100 text-blue-600"
+                  : "bg-emerald-100 text-emerald-600"
               }`}
             >
               {duration}
@@ -137,7 +139,7 @@ export const RecordCard = ({ data: r, className, ...props }: Props) => {
         </div>
       </div>
 
-      <div className="details h-24 bg-slate-300 py-1 px-2 text-xs shadow-inner dark:bg-slate-700">
+      <div className="details /dark:bg-slate-700 h-24 bg-slate-300 py-1 px-2 text-xs shadow-inner">
         <div className="description">{r.description}</div>
         {/* A check box to make it like a task which if checked, a new record will be created. */}
         <div className="times">
